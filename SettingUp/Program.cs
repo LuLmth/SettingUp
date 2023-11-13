@@ -10,7 +10,6 @@ class Program
         if (arguments.Length != 1)
         {
             Console.WriteLine("You must provide a path of a valid file.");
-            Console.WriteLine($"Example: {AppDomain.CurrentDomain.FriendlyName} map.txt");
             return ErrorCode;
         }
 
