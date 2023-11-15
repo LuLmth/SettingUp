@@ -34,9 +34,15 @@ public class Parser
                 lines = lines[1..];
             }
             return lines;
-        } catch (Exception) // TODO: Catch specific exceptions.
+        } catch (FileNotFoundException)
         {
-            throw new InvalidFileException(_filepath);
+            throw new OpeningFileException(_filepath);
+        } catch (UnauthorizedAccessException)
+        {
+            throw new OpeningFileException(_filepath);
+        } catch (IOException)
+        {
+            throw new OpeningFileException(_filepath);
         }
     }
 

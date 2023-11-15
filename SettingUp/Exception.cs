@@ -5,6 +5,11 @@ public class MapNotInitializedException : Exception
     public MapNotInitializedException() : base("Map is not initialized.") {}
 }
 
+public class OpeningFileException : Exception
+{
+    public OpeningFileException(string filepath) : base($"Cannot open file: {filepath}.") {}
+}
+
 public class InvalidFileException : Exception
 {
     public InvalidFileException(string filepath) : base($"Invalid file: {filepath}.") {}
