@@ -20,6 +20,19 @@ public class SettingUp
         _map = parser.MapToIntArray();
     }
 
+    private int ProcessNewMapValue(int[] aroundValues, int rowIndex, int columnIndex)
+    {
+        int minimum = aroundValues.Min();
+
+        if (minimum >= _biggestSquareSize)
+        {
+            _biggestSquareSize = minimum + 1;
+            _biggestSquareRowIndex = rowIndex;
+            _biggestSquareColumnIndex = columnIndex;
+        }
+        return minimum + 1;
+    }
+
     public void FindBiggestSquare()
     {
         if (_map == null)
@@ -33,16 +46,9 @@ public class SettingUp
             {
                 if (_map[rowIndex][columnIndex] != 0)
                 {
-                    int[] values = { _map[rowIndex - 1][columnIndex], _map[rowIndex][columnIndex - 1], _map[rowIndex - 1][columnIndex - 1] };
-                    int minimum = values.Min();
+                    int[] around = { _map[rowIndex - 1][columnIndex], _map[rowIndex][columnIndex - 1], _map[rowIndex - 1][columnIndex - 1] };
 
-                    if (minimum >= _biggestSquareSize)
-                    {
-                        _biggestSquareSize = minimum + 1;
-                        _biggestSquareRowIndex = rowIndex;
-                        _biggestSquareColumnIndex = columnIndex;
-                    }
-                    _map[rowIndex][columnIndex] = minimum + 1;
+                    _map[rowIndex][columnIndex] = ProcessNewMapValue(around, rowIndex, columnIndex);
                 }
             }
         }
