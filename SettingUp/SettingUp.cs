@@ -2,7 +2,10 @@ namespace SettingUp;
 
 public class SettingUp
 {
-    private int[][]? _map;
+    private readonly string _filepath;
+
+    private string[] _buffer;
+    private int[][] _map;
 
     /*
      * _biggestSquareSize is the size of the biggest square found in the map.
@@ -13,17 +16,41 @@ public class SettingUp
     private int _biggestSquareRowIndex;
     private int _biggestSquareColumnIndex;
 
-    public void ParseMap(string filepath)
+    public SettingUp(string filepath)
     {
-        Parser parser = new Parser(filepath);
-
-        _map = parser.MapToIntArray();
+        _filepath = filepath;
+        _buffer = Array.Empty<string>();
+        _map = Array.Empty<int[]>();
     }
 
-    private int ProcessNewMapValue(int[] aroundValues, int rowIndex, int columnIndex)
+    public void Run()
     {
-        int minimum = aroundValues.Min();
+        Parser parser = new Parser(_filepath);
 
+        _buffer = parser.ReadFile();
+        _map = parser.MapFromBuffer(_buffer);
+
+        FindBiggestSquare();
+        DisplayMap();
+    }
+
+    private void FindBiggestSquare()
+    {
+        for (int rowIndex = 1; rowIndex < _map.Length; rowIndex++)
+        {
+            for (int columnIndex = 1; columnIndex < _map[rowIndex].Length; columnIndex++)
+            {
+                if (_map[rowIndex][columnIndex] != 0)
+                {
+                    int minimum = Math.Min(Math.Min(_map[rowIndex - 1][columnIndex], _map[rowIndex][columnIndex - 1]), _map[rowIndex - 1][columnIndex - 1]);
+                    _map[rowIndex][columnIndex] = ProcessNewMapValue(minimum, rowIndex, columnIndex);
+                }
+            }
+        }
+    }
+    
+    private int ProcessNewMapValue(int minimum, int rowIndex, int columnIndex)
+    {
         if (minimum >= _biggestSquareSize)
         {
             _biggestSquareSize = minimum + 1;
@@ -33,60 +60,15 @@ public class SettingUp
         return minimum + 1;
     }
 
-    public void FindBiggestSquare()
+    private void DisplayMap()
     {
-        if (_map == null)
+        for (int rowIndex = 0; rowIndex < _buffer.Length; rowIndex++)
         {
-            throw new MapNotInitializedException();
-        }
-
-        for (int rowIndex = 1; rowIndex < _map.Length; rowIndex++)
-        {
-            for (int columnIndex = 1; columnIndex < _map[rowIndex].Length; columnIndex++)
+            if (rowIndex >= (_biggestSquareRowIndex - _biggestSquareSize) && rowIndex < _biggestSquareRowIndex)
             {
-                if (_map[rowIndex][columnIndex] != 0)
-                {
-                    int[] around = { _map[rowIndex - 1][columnIndex], _map[rowIndex][columnIndex - 1], _map[rowIndex - 1][columnIndex - 1] };
-
-                    _map[rowIndex][columnIndex] = ProcessNewMapValue(around, rowIndex, columnIndex);
-                }
+                _buffer[rowIndex] = _buffer[rowIndex].Remove(_biggestSquareColumnIndex - _biggestSquareSize + 1, _biggestSquareSize).Insert(_biggestSquareColumnIndex - _biggestSquareSize + 1, new string('x', _biggestSquareSize));
             }
-        }
-    }
-    
-    private bool IsInBiggestSquare(int rowIndex, int columnIndex)
-    {
-        return (rowIndex >= (_biggestSquareRowIndex - _biggestSquareSize + 1) &&
-               rowIndex <= _biggestSquareRowIndex) &&
-               (columnIndex >= (_biggestSquareColumnIndex - _biggestSquareSize + 1) &&
-               columnIndex <= _biggestSquareColumnIndex);
-    }
-    
-    public void DisplayMap()
-    {
-        if (_map == null)
-        {
-            throw new MapNotInitializedException();
-        }
-
-        for (int rowIndex = 0; rowIndex < _map.Length; rowIndex++)
-        {
-            for (int columnIndex = 0; columnIndex < _map[rowIndex].Length; columnIndex++)
-            {
-                if (IsInBiggestSquare(rowIndex, columnIndex))
-                {
-                    Console.Write("X");
-                }
-                else if (_map[rowIndex][columnIndex] == 0)
-                {
-                    Console.Write('o');
-                }
-                else
-                {
-                    Console.Write('.');
-                }
-            }
-            Console.WriteLine();
+            Console.WriteLine(_buffer[rowIndex]);
         }
     }
 }

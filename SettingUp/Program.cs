@@ -15,11 +15,9 @@ class Program
 
         try
         {
-            SettingUp settingUp = new SettingUp();
+            SettingUp settingUp = new SettingUp(arguments[0]);
 
-            settingUp.ParseMap(arguments[0]);
-            settingUp.FindBiggestSquare();
-            settingUp.DisplayMap();
+            settingUp.Run();
         }
         catch (Exception e)
         {

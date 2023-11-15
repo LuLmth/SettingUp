@@ -2,30 +2,24 @@ namespace SettingUp;
 
 public class Parser
 {
-    private readonly string[] _mapBuffer;
+    private readonly string _filepath;
 
-    private struct EmptySpace
+    private readonly Dictionary<char, int> _validCharacters = new()
     {
-        public const char InputValue = '.';
-        public const int InnerValue = 1;
-    }
-
-    private struct Obstacle
-    {
-        public const char InputValue = 'o';
-        public const int InnerValue = 0;
-    }
+        { '.', 1 },
+        { 'o', 0 }
+    };
 
     public Parser(string filepath)
     {
-        _mapBuffer = ReadMapFromFile(filepath);
+        _filepath = filepath;
     }
 
-    private string[] ReadMapFromFile(string filepath)
+    public string[] ReadFile()
     {
         try
         {
-            string[] lines = File.ReadAllLines(filepath);
+            string[] lines = File.ReadAllLines(_filepath);
 
             // If the first line is a number, it is the number of lines in the map.
             if (int.TryParse(lines[0], out int numberOfLines))
@@ -33,44 +27,37 @@ public class Parser
                 // If the number of lines is not equal to the number of lines in the array, the file is invalid.
                 if (numberOfLines != lines.Length - 1)
                 {
-                    throw new InvalidFileException(filepath);
+                    throw new InvalidFileException(_filepath);
                 }
 
                 // Remove the first line from the array.
                 lines = lines[1..];
             }
             return lines;
-        } catch (Exception)
+        } catch (Exception) // TODO: Catch specific exceptions.
         {
-            throw new InvalidFileException(filepath);
+            throw new InvalidFileException(_filepath);
         }
     }
 
-    private int CharToInt(char c)
+    public int[][] MapFromBuffer(string[] buffer)
     {
-        switch (c)
-        {
-            case EmptySpace.InputValue:
-                return EmptySpace.InnerValue;
-            case Obstacle.InputValue:
-                return Obstacle.InnerValue;
-            default:
-                throw new InvalidCharacterException(c);
-        }
-    }
-
-    public int[][] MapToIntArray()
-    {
-        int numberOfLines = _mapBuffer.Length;
+        int numberOfLines = buffer.Length;
         int[][] map = new int[numberOfLines][];
 
         for(int rowIndex = 0; rowIndex < numberOfLines; rowIndex++)
         {
-            int[] rowOfInt = new int[_mapBuffer[rowIndex].Length];
+            int[] rowOfInt = new int[buffer[rowIndex].Length];
 
-            for (int columnIndex = 0; columnIndex < _mapBuffer[rowIndex].Length; columnIndex++)
+            for (int columnIndex = 0; columnIndex < buffer[rowIndex].Length; columnIndex++)
             {
-                rowOfInt[columnIndex] = CharToInt(_mapBuffer[rowIndex][columnIndex]);
+                try
+                {
+                    rowOfInt[columnIndex] = _validCharacters[buffer[rowIndex][columnIndex]];
+                } catch (KeyNotFoundException)
+                {
+                    throw new InvalidCharacterException(buffer[rowIndex][columnIndex]);
+                }
             }
             map[rowIndex] = rowOfInt;
         }
